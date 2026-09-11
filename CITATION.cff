@@ -3,7 +3,7 @@ message: "If you use this repository, please cite it."
 title: "When RSI was at an extreme, what did price do on the very next candle? A decile event study of RSI windows on BTC and ETH"
 type: software
 authors:
-  - given-names: osnava
+  - given-names: Oscash
 version: 1.0.0
 date-released: "2026-08-21"
 license: MIT
