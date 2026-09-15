@@ -6,7 +6,7 @@ fall; RSI below 30 means price will bounce.*
 
 **Author:** Oscash · August 2026
 
-> **TL;DR** — In 9 years of data (Aug 2017 – Aug 2026), after RSI was *very high*,
+> **TL;DR** — In 9 years of data (Aug 2017 – Sep 2026), after RSI was *very high*,
 > the next candle kept going **up** on average — strength followed strength. After
 > RSI was *very low*, the next candle was basically a coin flip — there is no
 > reliable oversold bounce in crypto. Practical reading: use RSI as a **trend
@@ -54,8 +54,8 @@ That's it. No strategy, no stacking indicators on indicators. One question:
 *when the gauge was at an extreme, what happened next?*
 
 Here is a real page from the real notebook — BTC daily candles, RSI with window
-14, October 2023. For this data, the top 10% of all RSI values starts at **70.4**,
-so "top decile" simply means RSI ≥ 70.4:
+14, October 2023. For this data, the top 10% of all RSI values starts at **70.5**,
+so "top decile" simply means RSI ≥ 70.5:
 
 | Date | Close (USDT) | RSI | In top decile? | Next day did |
 |---|---|---|---|---|
@@ -80,8 +80,8 @@ mechanically, everywhere, and then averages:
 
 | Notebook (BTC daily, RSI 14) | Lines ("events") | Distinct visits ("spells") | Average next day | Verdict |
 |---|---|---|---|---|
-| RSI in **top** 10% | 327 | 67 | **+0.70%** | real signal (t = 3.2) |
-| RSI in **bottom** 10% | 328 | 82 | **+0.20%** | noise (t = 0.8) |
+| RSI in **top** 10% | 331 | 69 | **+0.68%** | real signal (t = 3.0) |
+| RSI in **bottom** 10% | 331 | 83 | **+0.19%** | noise (t = 0.8) |
 
 ("Top 10% of its own historical values" is what a *decile* means — each asset's
 extreme zone sits at a different RSI number, and it is not the 70/30 printed on
@@ -108,12 +108,12 @@ finding, not any single lucky cell.
 **1. Overbought is followed by continuation, not reversal — on every timeframe.**
 The "RSI very high" notebook shows a positive average next-candle return almost
 everywhere. Daily and 4h cells clear the standard significance bar, and most
-clear the much stricter multiple-testing bar (clustered t up to ~4; see Part 3).
+clear the much stricter multiple-testing bar (clustered t up to ~4.6; see Part 3).
 Strength follows strength.
 
 **2. There is no reliable oversold bounce.** The "RSI very low" notebook averages
 next to nothing on every timeframe. The single best-looking candidate (daily
-RSI-2, +0.57%/bar averaged over BTC+ETH) survives the basic statistical bar but
+RSI-2, +0.59%/bar averaged over BTC+ETH) survives the basic statistical bar but
 fails the strict one *and* flips sign between the first and second half of the
 sample — the statistical way of saying "that was luck."
 
@@ -128,8 +128,8 @@ on weekly with RSI length 21, pointing the same way as plain RSI momentum.
 **5. Costs matter, a lot, at 4h.** The same trend-filter rule (long while RSI > 50)
 goes from ruin to profit as the window slows: RSI(2) at 4h flips position ~6,700
 times over the sample and, compounded net of 0.1% per side, destroys the account
-(≈ 0×); RSI(14) keeps 6–14× and RSI(30) keeps 10–17× (buy & hold: 18× BTC,
-8× ETH). The "oversold entry" rules are worse — at 4h they lose 1.2–1.7% *per
+(≈ 0×); RSI(14) keeps 6–12× and RSI(30) keeps 10–15× (buy & hold: 18× BTC,
+8× ETH). The "oversold entry" rules are worse — at 4h they lose 1.0–2.1% *per
 trade even before costs*. Mean reversion isn't eaten by fees at 4h; it never
 existed there.
 
@@ -175,7 +175,7 @@ Look back at the October 2023 table: RSI didn't *visit* the top decile for one
 day, it camped there for 25 consecutive days. That is one event, not 25 — it's
 like having 25 near-duplicate pages in the notebook and pretending you ran the
 experiment 25 times. The study calls each visit a **spell** (BTC daily RSI-14:
-327 decile days, but only 67 spells) and computes its uncertainty from spells,
+331 decile days, but only 69 spells) and computes its uncertainty from spells,
 which is what "spell-clustered t-statistics" means. Ignoring this makes results
 look several times more significant than they are.
 
@@ -243,8 +243,8 @@ the visual form of the headline result — continuation at highs, nothing at low
 
 ## Technical abstract
 
-Using Binance spot candles for BTCUSDT and ETHUSDT (August 2017 – August 2026;
-471 weekly, 3,293 daily, 19,736 4-hour bars per asset), we sample every candle in
+Using Binance spot candles for BTCUSDT and ETHUSDT (August 2017 – September 2026;
+475 weekly, 3,316 daily, 19,879 4-hour bars per asset), we sample every candle in
 which RSI falls in the bottom or top decile of its own distribution and measure
 the next candle's close-to-close return. RSI lookbacks of 2–30 are tested per
 timeframe, plus StochRSI (7/14/21, 14, 3, 3). t-statistics use standard errors
@@ -255,9 +255,9 @@ clustered by decile spell; with ~200 cells tested, a multiple-testing-corrected
 
 1. **Overbought is followed by continuation, not reversal, on every timeframe** —
    the momentum result. Daily and 4h cells clear |t| = 2 and most clear the
-   |t| = 3.5 bar (clustered t up to ~4).
+   |t| = 3.5 bar (clustered t up to ~4.6).
 2. **There is no reliable oversold bounce in crypto.** The only candidate is
-   daily RSI-2 (+0.57%/bar avg BTC+ETH, clustered t = 2.2): it survives
+   daily RSI-2 (+0.59%/bar avg BTC+ETH, clustered t = 2.3): it survives
    clustering but not the multiple-testing bar, and flips sign between sample
    halves.
 3. **Weekly is momentum with thin evidence** — positive decile returns for

@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
 
+import scan
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 plt.rcParams.update({
@@ -129,18 +131,30 @@ def build(sub_ic, sub_cl, asset_line, out_name, caption=CAPTION):
     return fig
 
 
+def sample_label(symbol):
+    """Sample span and bar counts straight from the cached candles, so figure
+    subtitles can never drift from the data they describe."""
+    counts = {tf: len(scan.load(symbol, tf)) for tf in TFS}
+    idx = scan.load(symbol, "1d").index
+    span = f"{idx[0]:%B %Y} \u2013 {idx[-1]:%B %Y}"
+    bars = (f"{counts['1w']:,} weekly / {counts['1d']:,} daily / "
+            f"{counts['4h']:,} 4h candles")
+    return span, bars
+
+
 def main():
     ic = pd.read_csv(os.path.join(HERE, "results", "results_ic.csv"))
     cl = pd.read_csv(os.path.join(HERE, "results", "results_ic_clustered.csv"))
-    bars = "471 weekly / 3,293 daily / 19,736 4h candles"
     figs = []
     for sym, label in [("BTCUSDT", "BTC"), ("ETHUSDT", "ETH")]:
+        span, bars = sample_label(sym)
         figs.append(build(ic[ic["symbol"].eq(sym)], cl[cl["symbol"].eq(sym)],
                           f"RSI decile event study  \u00b7  {sym} ({label}), "
-                          f"Binance spot, August 2017 \u2013 August 2026  \u00b7  {bars}",
+                          f"Binance spot, {span}  \u00b7  {bars}",
                           f"heatmap_{label.lower()}.png"))
+    span, bars = sample_label("BTCUSDT")
     figs.append(build(ic, cl, f"RSI decile event study  \u00b7  BTC & ETH average, Binance spot, "
-                              f"August 2017 \u2013 August 2026  \u00b7  {bars} per asset",
+                              f"{span}  \u00b7  {bars} per asset",
                       "heatmap.png"))
     return figs
 

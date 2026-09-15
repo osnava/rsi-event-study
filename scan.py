@@ -1,7 +1,8 @@
 """
 RSI / StochRSI window scan on BTC & ETH, 1w / 1d / 4h candles.
 
-Data: Binance public klines (fallback Bybit), cached to ./data/*.csv
+Data: Binance public klines (fallback Bybit), cached to ./data/*.csv and
+refreshed incrementally on every run (only new candles are re-downloaded).
 Analysis:
   1. Information content: Spearman corr(indicator_t, next-bar return) per window.
      Negative corr = oversold bounces (mean reversion); positive = momentum.
@@ -38,28 +39,44 @@ def http_json(url):
         return json.loads(r.read().decode())
 
 
-def fetch_binance(symbol, interval, limit=1000):
-    """Newest-first pagination. Returns oldest-first DataFrame."""
-    rows, end_id = [], None
-    while True:
-        url = (f"https://api.binance.com/api/v3/klines?symbol={symbol}"
-               f"&interval={interval}&limit={limit}")
-        if end_id:
-            url += f"&endTime={end_id - 1}"
-        batch = http_json(url)
-        if not batch:
-            break
-        rows = batch + rows
-        end_id = batch[0][0]
-        if len(batch) < limit:
-            break
-        time.sleep(0.15)
+def fetch_binance(symbol, interval, limit=1000, start_ms=None):
+    """Full history (newest-first pagination) when start_ms is None, else only
+    bars opening at or after start_ms (forward pagination). Oldest-first DataFrame."""
+    rows = []
+    if start_ms is None:
+        end_id = None
+        while True:
+            url = (f"https://api.binance.com/api/v3/klines?symbol={symbol}"
+                   f"&interval={interval}&limit={limit}")
+            if end_id:
+                url += f"&endTime={end_id - 1}"
+            batch = http_json(url)
+            if not batch:
+                break
+            rows = batch + rows
+            end_id = batch[0][0]
+            if len(batch) < limit:
+                break
+            time.sleep(0.15)
+    else:
+        cur = start_ms
+        while True:
+            url = (f"https://api.binance.com/api/v3/klines?symbol={symbol}"
+                   f"&interval={interval}&startTime={cur}&limit={limit}")
+            batch = http_json(url)
+            if not batch:
+                break
+            rows += batch
+            cur = batch[-1][0] + 1
+            if len(batch) < limit:
+                break
+            time.sleep(0.15)
     df = pd.DataFrame(rows, columns=["ot", "o", "h", "l", "c", "v", "ct",
                                      "qv", "n", "tbb", "tbq", "ig"])
     return clean(df)
 
 
-def fetch_bybit(symbol, interval):
+def fetch_bybit(symbol, interval, start_ms=None):
     imap = {"1w": "W", "1d": "D", "4h": "240"}
     rows, end = [], None
     while True:
@@ -67,6 +84,8 @@ def fetch_bybit(symbol, interval):
                f"&symbol={symbol}&interval={imap[interval]}&limit=1000")
         if end:
             url += f"&end={end}"
+        if start_ms:
+            url += f"&start={start_ms}"
         batch = http_json(url)
         if batch["retCode"] != 0:
             raise RuntimeError(batch)
@@ -74,8 +93,8 @@ def fetch_bybit(symbol, interval):
         if not k:
             break
         rows = k + rows  # bybit returns newest-first
-        end = rows[0][0]
-        if len(k) < 1000:
+        end = min(int(r[0]) for r in k) - 1
+        if len(k) < 1000 or (start_ms and end < start_ms):
             break
         time.sleep(0.15)
     df = pd.DataFrame(rows, columns=["ot", "o", "h", "l", "c", "v", "ct"])
@@ -95,9 +114,30 @@ def clean(df):
 
 
 def load(symbol, interval):
+    """Read the cache and refresh it with any bars newer than the last cached
+    open time (the last cached bar is re-fetched too, in case it was still
+    forming when cached). Fetches full history when no cache exists."""
     path = os.path.join(DATA, f"{symbol}_{interval}.csv")
     if os.path.exists(path):
-        return pd.read_csv(path, index_col=0, parse_dates=True)
+        old = pd.read_csv(path, index_col=0, parse_dates=True)
+        # numpy datetime64 -> epoch ms directly: tz-naive .timestamp() would
+        # shift by the local UTC offset
+        start_ms = int(old.index[-1].value // 10**6)
+        try:
+            new = fetch_binance(symbol, interval, start_ms=start_ms)
+            src = "binance"
+        except Exception:
+            new = fetch_bybit(symbol, interval, start_ms=start_ms)
+            src = "bybit"
+        df = pd.concat([old, new])
+        df = df[~df.index.duplicated(keep="last")].sort_index()
+        if not df.equals(old):
+            df.to_csv(path)
+            what = (f"{len(old)} -> {len(df)} bars" if len(df) != len(old)
+                    else f"{len(df)} bars (last bar refreshed)")
+            print(f"updated {symbol} {interval} from {src}: {what} "
+                  f"{df.index[0].date()} -> {df.index[-1].date()}")
+        return df
     try:
         df = fetch_binance(symbol, interval)
         src = "binance"

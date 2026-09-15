@@ -250,6 +250,8 @@ def trend_equity(sym, n=14, cost=scan.COST_PER_SIDE):
 
 
 def fig6_trend_filter():
+    idx0 = scan.load("BTCUSDT", "1d").index  # sample span for the subtitle
+    span = f"{idx0[0]:%b %Y} - {idx0[-1]:%b %Y}"
     fig, axes = plt.subplots(2, 1, figsize=(10, 7.4))
     for ax, sym, lab in [(axes[0], "BTCUSDT", "BTC"), (axes[1], "ETHUSDT", "ETH")]:
         idx, eq, bh, pos = trend_equity(sym)
@@ -274,7 +276,7 @@ def fig6_trend_filter():
                 f"in market {pos.mean():.0%} of days",
                 transform=ax.transAxes, ha="right", fontsize=8.5, color="#444444")
     title(axes[0], "6 · The practical reading: RSI as a trend filter, not a reversal dial",
-          "Daily candles, Aug 2017 - Aug 2026. Signal acted on at the next bar, 0.1% per side paid. "
+          f"Daily candles, {span}. Signal acted on at the next bar, 0.1% per side paid. "
           "Green shading = days the rule is in the market.")
     fig.tight_layout()
     save(fig, "explain_6_trend_filter.png")
@@ -286,9 +288,12 @@ def fig7_costs():
     windows = [2, 4, 7, 14, 21, 30]
     x = np.arange(len(windows))
     fig, ax = plt.subplots(figsize=(10, 5.0))
+    years = 0.0
+    tops = []
     for sym, off, col, lab in [("BTCUSDT", -0.19, UP, "BTC"),
                                ("ETHUSDT", 0.19, DOWN, "ETH")]:
         df = scan.load(sym, "4h")
+        years = max(years, (df.index[-1] - df.index[0]).days / 365.25)
         r = df["close"].pct_change(fill_method=None).fillna(0.0)
         mult, churn = [], []
         for n in windows:
@@ -297,6 +302,7 @@ def fig7_costs():
             s = pos * r - pos.diff().abs().fillna(0.0) * scan.COST_PER_SIDE
             mult.append((1.0 + s).prod())
             churn.append(int(pos.diff().abs().sum()))
+        tops += mult
         bars = ax.bar(x + off, mult, width=0.36, color=col,
                       label=f"{lab}: trend filter (RSI > 50), compounded net of costs")
         for b, m, c in zip(bars, mult, churn):
@@ -304,6 +310,7 @@ def fig7_costs():
                     f"{m:.2f}×\n{c:,} switches", ha="center", va="bottom",
                     fontsize=7.8, color="#444444")
         bh = df["close"].iloc[-1] / df["close"].iloc[0]
+        tops.append(bh)
         ax.axhline(bh, color=col, lw=0.9, ls=":", alpha=0.8)
         ax.text(0.01, bh + 0.3, f"{lab} buy & hold {bh:.0f}×",
                 fontsize=8.2, color=col, ha="left",
@@ -311,11 +318,13 @@ def fig7_costs():
                     ax.transAxes, ax.transData))
     ax.axhline(0, color="#444444", lw=0.8)
     ax.set_xticks(x, [f"RSI {n}" for n in windows])
-    ax.set_ylabel("value of $1 after 9 years")
-    ax.set_ylim(0, 22)
+    ax.set_ylabel(f"value of $1 after {years:.0f} years")
+    ax.set_ylim(0, max(tops) * 1.18)
     ax.legend(fontsize=8.5, frameon=False, loc="upper left")
+    idx4 = scan.load("BTCUSDT", "4h").index
     title(ax, "7 · The cost guillotine at 4h",
-          "Same rule, different RSI windows, 4h candles (Aug 2017 - Aug 2026), 0.1% paid per side. "
+          f"Same rule, different RSI windows, 4h candles ({idx4[0]:%b %Y} - {idx4[-1]:%b %Y}), "
+          "0.1% paid per side. "
           "Fast windows flip thousands of times and the fees compound into ruin; only slow windows keep the edge.")
     fig.tight_layout()
     save(fig, "explain_7_costs.png")
