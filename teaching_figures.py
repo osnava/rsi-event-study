@@ -37,8 +37,9 @@ def save(fig, name):
     print(f"saved {name}")
 
 
-def title(ax, main, sub=None):
-    ax.set_title(main, fontsize=11.5, loc="left", pad=14 if sub else 6)
+def title(ax, main, sub=None, pad=None):
+    ax.set_title(main, fontsize=11.5, loc="left",
+                 pad=pad if pad is not None else (14 if sub else 6))
     if sub:
         ax.text(0, 1.02, sub, transform=ax.transAxes, fontsize=8.6,
                 color="#555555", va="bottom")
@@ -287,12 +288,14 @@ def fig7_costs():
     """The cost guillotine at 4h: fast windows churn, fees compound into ruin."""
     windows = [2, 4, 7, 14, 21, 30]
     x = np.arange(len(windows))
-    fig, ax = plt.subplots(figsize=(10, 5.0))
+    fig, ax = plt.subplots(figsize=(10.8, 5.4))
     years = 0.0
     tops = []
+    churns, bhs, idx4 = {}, {}, None
     for sym, off, col, lab in [("BTCUSDT", -0.19, UP, "BTC"),
                                ("ETHUSDT", 0.19, DOWN, "ETH")]:
         df = scan.load(sym, "4h")
+        idx4 = df.index
         years = max(years, (df.index[-1] - df.index[0]).days / 365.25)
         r = df["close"].pct_change(fill_method=None).fillna(0.0)
         mult, churn = [], []
@@ -302,30 +305,33 @@ def fig7_costs():
             s = pos * r - pos.diff().abs().fillna(0.0) * scan.COST_PER_SIDE
             mult.append((1.0 + s).prod())
             churn.append(int(pos.diff().abs().sum()))
+        churns[lab] = churn
         tops += mult
         bars = ax.bar(x + off, mult, width=0.36, color=col,
                       label=f"{lab}: trend filter (RSI > 50), compounded net of costs")
-        for b, m, c in zip(bars, mult, churn):
-            ax.text(b.get_x() + b.get_width() / 2, max(m, 0) + 0.35,
-                    f"{m:.2f}×\n{c:,} switches", ha="center", va="bottom",
-                    fontsize=7.8, color="#444444")
+        # single short tag above each bar; switch counts live in the tick labels
+        for b, m in zip(bars, mult):
+            ax.text(b.get_x() + b.get_width() / 2, m + 0.3, f"{m:.1f}×",
+                    ha="center", va="bottom", fontsize=8.2, color="#444444")
         bh = df["close"].iloc[-1] / df["close"].iloc[0]
+        bhs[lab] = bh
         tops.append(bh)
         ax.axhline(bh, color=col, lw=0.9, ls=":", alpha=0.8)
-        ax.text(0.01, bh + 0.3, f"{lab} buy & hold {bh:.0f}×",
+        ax.text(0.01, bh + 0.35, f"{lab} buy & hold {bh:.0f}×",
                 fontsize=8.2, color=col, ha="left",
                 transform=matplotlib.transforms.blended_transform_factory(
                     ax.transAxes, ax.transData))
     ax.axhline(0, color="#444444", lw=0.8)
-    ax.set_xticks(x, [f"RSI {n}" for n in windows])
+    ax.set_xticks(x, [f"RSI {n}\nBTC {churns['BTC'][i]:,} · ETH {churns['ETH'][i]:,}"
+                      for i, n in enumerate(windows)], fontsize=8.0)
     ax.set_ylabel(f"value of $1 after {years:.0f} years")
-    ax.set_ylim(0, max(tops) * 1.18)
+    ax.set_ylim(0, max(tops) * 1.22)
     ax.legend(fontsize=8.5, frameon=False, loc="upper left")
-    idx4 = scan.load("BTCUSDT", "4h").index
     title(ax, "7 · The cost guillotine at 4h",
           f"Same rule, different RSI windows, 4h candles ({idx4[0]:%b %Y} - {idx4[-1]:%b %Y}), "
-          "0.1% paid per side. "
-          "Fast windows flip thousands of times and the fees compound into ruin; only slow windows keep the edge.")
+          "0.1% paid per side; position switches (BTC · ETH) under each group.\n"
+          "Fast windows flip thousands of times and the fees compound into ruin; "
+          "only slow windows keep the edge.", pad=34)
     fig.tight_layout()
     save(fig, "explain_7_costs.png")
 
