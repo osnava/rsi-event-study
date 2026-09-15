@@ -5,6 +5,7 @@ results/*.csv), so the images can never drift from the numbers in the text.
 Style matches paper_heatmap.py (serif, 200 dpi). Writes figures/explain_*.png.
 """
 import os
+import textwrap
 
 import matplotlib
 matplotlib.use("Agg")
@@ -38,8 +39,17 @@ def save(fig, name):
 
 
 def title(ax, main, sub=None, pad=None):
+    # wrap the subtitle to the axes width: an overflowing transAxes text
+    # wrecks the tight layout (squeezed axes / blank canvas regions)
+    n_lines = 1
+    if sub:
+        w_in = ax.get_position().width * ax.figure.get_figwidth()
+        cols = max(20, int(w_in / 0.068))
+        sub = "\n".join(textwrap.fill(part, cols) for part in sub.split("\n"))
+        n_lines = sub.count("\n") + 1
     ax.set_title(main, fontsize=11.5, loc="left",
-                 pad=pad if pad is not None else (14 if sub else 6))
+                 pad=pad if pad is not None else
+                 (14 + 13 * (n_lines - 1) if sub else 6))
     if sub:
         ax.text(0, 1.02, sub, transform=ax.transAxes, fontsize=8.6,
                 color="#555555", va="bottom")
@@ -220,7 +230,8 @@ def fig5_multiple_testing():
 
     fig, ax = plt.subplots(figsize=(10, 4.4))
     ax.hist(t, bins=32, color="#c8c8c8", edgecolor="white", lw=0.3)
-    ax.set_xlim(t.min() - 0.5, t.max() + 0.5)
+    # show both tails' threshold lines even if no cell reaches that far
+    ax.set_xlim(min(t.min() - 0.5, -3.9), max(t.max() + 0.7, 3.9))
     for v, c, ls, lab in [(2, "#666666", "--", "|t| = 2  “interesting”"),
                           (3.5, "#111111", "-", "|t| = 3.5  strict bar for ~200 tests")]:
         ax.axvline(v, color=c, ls=ls, lw=1.2)

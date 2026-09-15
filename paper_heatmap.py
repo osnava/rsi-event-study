@@ -92,10 +92,17 @@ def build(sub_ic, sub_cl, asset_line, out_name, caption=CAPTION):
                 if np.isnan(v):
                     continue
                 fmt = "%+.2f" if kind == "fwd" else "%+.1f"
-                ax.text(x, y, fmt % v, ha="center", va="center", fontsize=9)
+                # white text on saturated cells, black on pale ones
+                rgba = im.cmap(im.norm(v))
+                lum = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
+                ax.text(x, y, fmt % v, ha="center", va="center", fontsize=9,
+                        color="white" if lum < 0.5 else "black")
                 if kind == "fwd" and abs(tst[side].iloc[y, x]) >= 2:
+                    # zorder above the white minor grid, which would otherwise
+                    # paint over the border (grid sits above patches by default)
                     ax.add_patch(Rectangle((x - 0.5, y - 0.5), 1, 1, fill=False,
-                                           edgecolor="black", linewidth=1.5))
+                                           edgecolor="black", linewidth=1.6,
+                                           zorder=3))
         cb = fig.colorbar(im, ax=ax, shrink=0.8)
         cb.ax.tick_params(labelsize=8)
         cb.set_label("next-candle return (%)" if kind == "fwd" else "t-statistic",

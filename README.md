@@ -244,7 +244,7 @@ the visual form of the headline result — continuation at highs, nothing at low
 ## Technical abstract
 
 Using Binance spot candles for BTCUSDT and ETHUSDT (August 2017 – September 2026;
-475 weekly, 3,316 daily, 19,879 4-hour bars per asset), we sample every candle in
+475 weekly, 3,317 daily, 19,883 4-hour bars per asset), we sample every candle in
 which RSI falls in the bottom or top decile of its own distribution and measure
 the next candle's close-to-close return. RSI lookbacks of 2–30 are tested per
 timeframe, plus StochRSI (7/14/21, 14, 3, 3). t-statistics use standard errors
