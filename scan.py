@@ -26,7 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data")
 os.makedirs(DATA, exist_ok=True)
 
-SYMBOLS = ["BTCUSDT", "ETHUSDT"]
+SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
 INTERVALS = ["1w", "1d", "4h"]
 RSI_WINDOWS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 21, 25, 30]
 COST_PER_SIDE = 0.001  # 0.1% per side (taker fee + slippage)
@@ -299,20 +299,29 @@ def main():
     sb.to_csv(os.path.join(res, "results_stability.csv"), index=False)
 
     pd.set_option("display.width", 200)
-    print("\n=== Spearman corr(RSI_t, next-bar return), avg BTC+ETH, per tf ===")
-    piv = ic.groupby(["tf", "window"])[["spearman", "t"]].mean().reset_index()
-    print(piv.pivot(index="window", columns="tf", values="spearman").round(4).to_string())
+    print("\n=== Spearman corr(RSI_t, next-bar return), per asset, per tf ===")
+    for sym in SYMBOLS:  # individual studies: never average across assets
+        print(f"### {sym}")
+        print(ic[ic.symbol.eq(sym)].pivot_table(
+            index="window", columns="tf", values="spearman")
+            .reindex(columns=INTERVALS).round(4).to_string())
 
-    print("\n=== Net-of-cost backtest (avg BTC+ETH, total return over sample) ===")
-    pb = bt.groupby(["tf", "window"])[["mr_ret", "mom_ret", "mr_trades",
-                                       "mr_win", "mom_win"]].mean().reset_index()
-    print(pb.pivot(index="window", columns="tf", values="mr_ret").round(3).to_string())
-    print("--- momentum (long RSI>50) ---")
-    print(pb.pivot(index="window", columns="tf", values="mom_ret").round(3).to_string())
+    print("\n=== Net-of-cost backtest (summed trade returns, per asset) ===")
+    for sym in SYMBOLS:
+        pb = bt[bt.symbol.eq(sym)]
+        print(f"### {sym} --- MR (entry RSI<rolling p10, exit RSI>50) ---")
+        print(pb.pivot_table(index="window", columns="tf", values="mr_ret")
+              .reindex(columns=INTERVALS).round(3).to_string())
+        print("--- momentum (long RSI>50) ---")
+        print(pb.pivot_table(index="window", columns="tf", values="mom_ret")
+              .reindex(columns=INTERVALS).round(3).to_string())
 
-    print("\n=== StochRSI(14,14,3,3 vs 7/21) Spearman + decile returns ===")
-    print(st.groupby(["tf", "rsi_len"])[["spearman", "low10_fwd",
-                                         "high10_fwd"]].mean().round(4).to_string())
+    print("\n=== StochRSI(14,14,3,3 vs 7/21) Spearman + decile returns, per asset ===")
+    for sym in SYMBOLS:
+        print(f"### {sym}")
+        print(st[st.symbol.eq(sym)].groupby(["tf", "rsi_len"])[["spearman", "low10_fwd",
+                                                                "high10_fwd"]]
+              .mean().round(4).to_string())
 
     print("\n=== Stability: 1st vs 2nd half Spearman ===")
     print(sb.round(4).to_string(index=False))

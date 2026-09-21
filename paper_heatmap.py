@@ -38,11 +38,13 @@ CAPTION = (
     "own distribution were sampled and the next candle's close-to-close return averaged; panels C "
     "and D report t-statistics with standard errors clustered by decile spell (runs of consecutive "
     "candles in the decile), correcting the overstatement of significance caused by clustered "
-    "events. Black borders mark |t| \u2265 2; with about 200 cells tested, a Bonferroni 5% "
-    "threshold requires |t| \u2265 3.5 (Harvey, Liu & Zhu 2016 argue for t > 3 hurdles). Decile "
-    "thresholds use the full sample, so results describe this dataset rather than a tradable rule; "
-    "costs and execution are not modelled. Weekly cells average 46 events but only about 13 "
-    "independent spells \u2014 indicative only."
+    "events. Black borders mark |t| \u2265 2; with about 290 cells tested across the three assets "
+    "(3 assets \u00d7 3 timeframes \u00d7 16 windows \u00d7 2 sides), a Bonferroni 5% threshold "
+    "requires |t| \u2265 3.7 (Harvey, Liu & Zhu 2016 argue for t > 3 hurdles). Every figure is a "
+    "single asset; assets are never averaged. Decile thresholds use the full sample, so results "
+    "describe this dataset rather than a tradable rule; costs and execution are not modelled. "
+    "Weekly cells rest on few independent spells \u2014 indicative only. SOL history starts "
+    "Aug 2020 (6.1y) vs Aug 2017 for BTC/ETH."
 )
 REFS = (
     "References:  Wilder (1978), New Concepts in Technical Trading Systems  \u00b7  Connors & "
@@ -152,18 +154,13 @@ def sample_label(symbol):
 def main():
     ic = pd.read_csv(os.path.join(HERE, "results", "results_ic.csv"))
     cl = pd.read_csv(os.path.join(HERE, "results", "results_ic_clustered.csv"))
-    figs = []
-    for sym, label in [("BTCUSDT", "BTC"), ("ETHUSDT", "ETH")]:
+    # individual studies: one figure per asset, never a cross-asset average
+    for sym, label in [("BTCUSDT", "BTC"), ("ETHUSDT", "ETH"), ("SOLUSDT", "SOL")]:
         span, bars = sample_label(sym)
-        figs.append(build(ic[ic["symbol"].eq(sym)], cl[cl["symbol"].eq(sym)],
-                          f"RSI decile event study  \u00b7  {sym} ({label}), "
-                          f"Binance spot, {span}  \u00b7  {bars}",
-                          f"heatmap_{label.lower()}.png"))
-    span, bars = sample_label("BTCUSDT")
-    figs.append(build(ic, cl, f"RSI decile event study  \u00b7  BTC & ETH average, Binance spot, "
-                              f"{span}  \u00b7  {bars} per asset",
-                      "heatmap.png"))
-    return figs
+        build(ic[ic["symbol"].eq(sym)], cl[cl["symbol"].eq(sym)],
+              f"RSI decile event study  \u00b7  {sym} ({label}), "
+              f"Binance spot, {span}  \u00b7  {bars}",
+              f"heatmap_{label.lower()}.png")
 
 
 if __name__ == "__main__":

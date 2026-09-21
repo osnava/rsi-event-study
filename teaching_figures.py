@@ -226,14 +226,14 @@ def fig5_multiple_testing():
     cl = pd.read_csv(os.path.join(HERE, "results", "results_ic_clustered.csv"))
     t = cl["t_cluster"].dropna()
     n2 = (t.abs() >= 2).sum()
-    n35 = (t.abs() >= 3.5).sum()
+    n37 = (t.abs() >= 3.7).sum()
 
     fig, ax = plt.subplots(figsize=(10, 4.4))
     ax.hist(t, bins=32, color="#c8c8c8", edgecolor="white", lw=0.3)
     # show both tails' threshold lines even if no cell reaches that far
-    ax.set_xlim(min(t.min() - 0.5, -3.9), max(t.max() + 0.7, 3.9))
-    for v, c, ls, lab in [(2, "#666666", "--", "|t| = 2  “interesting”"),
-                          (3.5, "#111111", "-", "|t| = 3.5  strict bar for ~200 tests")]:
+    ax.set_xlim(min(t.min() - 0.5, -4.1), max(t.max() + 0.7, 4.1))
+    for v, c, ls, lab in [(2, "#666666", "--", f"|t| = 2  “interesting”"),
+                          (3.7, "#111111", "-", f"|t| = 3.7  strict bar for {len(t)} tests")]:
         ax.axvline(v, color=c, ls=ls, lw=1.2)
         ax.axvline(-v, color=c, ls=ls, lw=1.2)
         ax.text(v + 0.08, ax.get_ylim()[1] * 0.98, lab, fontsize=8.6,
@@ -241,10 +241,10 @@ def fig5_multiple_testing():
                 bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
     ax.set_xlabel("spell-clustered t-statistic of every tested cell")
     ax.set_ylabel("how many cells")
-    title(ax, "5 · Testing 200 things at once",
-          f"{len(t)} cells (2 assets × 3 timeframes × 16 windows × 2 sides). "
-          f"{n2} clear |t| ≥ 2, {n35} clear the strict |t| ≥ 3.5 bar — flip 200 coins and a few "
-          f"look magic; the bar exists so we don't fool ourselves.")
+    title(ax, f"5 · Testing {len(t)} things at once",
+          f"{len(t)} cells (3 assets × 3 timeframes × 16 windows × 2 sides, all evaluated). "
+          f"{n2} clear |t| ≥ 2, {n37} clear the strict |t| ≥ 3.7 bar — flip {len(t)} coins and a "
+          f"few look magic; the bar exists so we don't fool ourselves.")
     fig.tight_layout()
     save(fig, "explain_5_multiple_testing.png")
 

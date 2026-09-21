@@ -1,16 +1,19 @@
 # When RSI was at an extreme, what did price do on the very next candle?
 
-A study of RSI (and StochRSI) on **BTC** and **ETH**, across **weekly, daily, and
-4-hour** candles — built to answer one folk belief: *RSI above 70 means price will
-fall; RSI below 30 means price will bounce.*
+A study of RSI (and StochRSI) on **BTC, ETH and SOL** (SOL from Aug 2020), across
+**weekly, daily, and 4-hour** candles — built to answer one folk belief: *RSI
+above 70 means price will fall; RSI below 30 means price will bounce.*
 
 **Author:** Oscash · August 2026
 
-> **TL;DR** — In 9 years of data (Aug 2017 – Sep 2026), after RSI was *very high*,
-> the next candle kept going **up** on average — strength followed strength. After
-> RSI was *very low*, the next candle was basically a coin flip — there is no
-> reliable oversold bounce in crypto. Practical reading: use RSI as a **trend
-> filter** (long while RSI > 50), not as a 30/70 reversal dial.
+> **TL;DR** — In 9 years of BTC/ETH data and 6 of SOL (Aug 2017 – Sep 2026),
+> after RSI was *very high*, the next candle kept going **up** on average —
+> strength followed strength. After RSI was *very low*, the next candle was
+> basically a coin flip — there is no reliable oversold bounce in crypto.
+> Practical reading: use RSI as a **trend filter** (long while RSI > 50), not
+> as a 30/70 reversal dial. Assets are studied **individually, never
+> averaged** — and they disagree in interesting ways: SOL's weekly notebook is
+> the strongest cell family in the whole study, while its 4h shows nothing.
 
 The rest of this README builds the result from scratch: first in plain words with
 real examples, then the statistics that make it trustworthy, then the formal
@@ -89,37 +92,43 @@ charting tools:)
 
 ![what top decile of its own distribution means](figures/explain_3_deciles.png)
 
-### The study = that notebook, ~200 times
+### The study = that notebook, 288 times
 
 To avoid betting one answer on one setting, the notebook was filled out for:
 
-- **2 assets** (BTC, ETH) × **3 timeframes** (weekly, daily, 4h)
+- **3 assets** (BTC, ETH, SOL) × **3 timeframes** (weekly, daily, 4h)
 - **16 RSI windows** (2, 3, … 30) × **2 sides** (extreme high, extreme low)
 - plus **StochRSI** (RSI wrapped in a second oscillator) in several variants
 
-That is about 200 combinations — "cells" in the results. When nearly all of the
-"RSI very high" cells point the same way, that agreement *across settings* is the
-finding, not any single lucky cell.
+That is 288 combinations — "cells" in the results — and every asset is
+analyzed **individually**: cells are never averaged across assets. When nearly
+all of a given asset's "RSI very high" cells point the same way, that agreement
+*across settings* is the finding, not any single lucky cell.
 
 ---
 
 ## Part 2 — What the notebooks said
 
-**1. Overbought is followed by continuation, not reversal — on every timeframe.**
-The "RSI very high" notebook shows a positive average next-candle return almost
-everywhere. Daily and 4h cells clear the standard significance bar, and most
-clear the much stricter multiple-testing bar (clustered t up to ~4.6; see Part 3).
-Strength follows strength.
+**1. Overbought is followed by continuation, not reversal — in every asset, on
+its strongest timeframes.** Per asset: BTC's daily notebook clears |t| ≥ 2 in
+16 of 16 windows (max t 4.6) and its 4h in 15 of 16; ETH's 4h in 15 of 16
+(four cells past the strict 3.7 bar); SOL's daily in 13 of 16. Strength
+follows strength — and the exceptions are informative (see 3).
 
-**2. There is no reliable oversold bounce.** The "RSI very low" notebook averages
-next to nothing on every timeframe. The single best-looking candidate (daily
-RSI-2, +0.59%/bar averaged over BTC+ETH) survives the basic statistical bar but
-fails the strict one *and* flips sign between the first and second half of the
-sample — the statistical way of saying "that was luck."
+**2. There is no reliable oversold bounce — in any asset.** Every asset's
+"RSI very low" notebook averages next to nothing: at |t| ≥ 2, BTC's daily
+keeps 1 of 16 windows, ETH's daily 1, SOL's daily 0. SOL's 4h shows a faint
+short-window version (t up to 2.8 at windows 2–4) worth ≈ +0.1%/bar — smaller
+than the 0.2% round-trip cost, so not tradable and nowhere near the strict
+bar. The statistical way of saying "that was luck."
 
-**3. Weekly looks like momentum too, but with thin evidence.** Nearly all weekly
-cells are positive, but each weekly cell rests on only ~46 events (~13
-independent spells), so treat weekly as indicative only.
+**3. Weekly: thin evidence — except SOL, where it is the strongest signal in
+the study.** BTC's weekly cells are positive (11 of 16 past |t| ≥ 2, max
+t 3.8) but rest on few independent spells; ETH's weekly is weak (4 of 16).
+SOL's weekly is the outlier: top-decile RSI was followed by +6.6% to +12.0%
+*per week* on windows 7–21, with clustered t up to 10.1 and 11 of 16 windows
+past the strict bar — from only 320 weekly candles of a young, trend-heavy
+asset. Spectacular, but treat as fragile.
 
 **4. StochRSI adds nothing over plain RSI.** Its predictive correlation with the
 next candle is ≈ 0 on daily and 4h — RSI wearing a costume. The only flicker is
@@ -145,6 +154,10 @@ a reversal dial:
 | Weekly | RSI **6–9** | trend confirmation; few independent events, indicative |
 | Daily | RSI **14** (2–4 optional pullback-timing overlay) | the boring, stable pick |
 | 4h | RSI **14** | signal is strong but only slow windows survive costs |
+
+SOL is the exception worth its own line: on this sample its **weekly** was the
+strongest RSI-momentum family anywhere (t up to 10.1) and its 4h showed none —
+parameters are per-asset, which is exactly why the studies are kept individual.
 
 ![trend filter vs buy and hold](figures/explain_6_trend_filter.png)
 
@@ -181,13 +194,13 @@ look several times more significant than they are.
 
 ### Trap 3 — Testing 200 things and reporting the winner
 
-If you flip 200 coins, a few will land five heads in a row — not because they are
-magic, but because you tried 200 times. Testing 200 trading-rule combinations and
+If you flip 288 coins, a few will land five heads in a row — not because they are
+magic, but because you tried 288 times. Testing 288 trading-rule combinations and
 quoting the best one is the same trick played on yourself. The honest options:
 demand a much higher bar, and weight the *pattern across cells* over any single
 cell. This study does both — the strict bar is explained next.
 
-![all ~200 t-statistics at once](figures/explain_5_multiple_testing.png)
+![all 288 t-statistics at once](figures/explain_5_multiple_testing.png)
 
 ### What the "t" numbers mean (30-second version)
 
@@ -199,9 +212,9 @@ The **t-statistic** condenses that into one number: roughly
 > t = (size of the average) ÷ (how noisily entries swing around it)
 
 - |t| ≥ 2 — "interesting, but could still be luck"
-- |t| ≥ 3.5 — "very hard to explain by luck." The extra strictness (instead of
-  the usual 2) is the Trap-3 correction: with ~200 cells tested, a 5%
-  Bonferroni threshold lands at |t| ≥ 3.5 (Harvey, Liu & Zhu 2016 argue similar
+- |t| ≥ 3.7 — "very hard to explain by luck." The extra strictness (instead of
+  the usual 2) is the Trap-3 correction: with 288 cells tested, a 5%
+  Bonferroni threshold lands at |t| ≥ 3.7 (Harvey, Liu & Zhu 2016 argue similar
   t > 3 hurdles for multiply-tested factors). The sign of t gives the direction
   (positive = next candle up on average).
 
@@ -221,11 +234,12 @@ highest-scoring one.
 
 | | |
 |---|---|
-| ![combined](figures/heatmap.png) | BTC + ETH average |
 | ![btc](figures/heatmap_btc.png) | BTC only |
 | ![eth](figures/heatmap_eth.png) | ETH only |
+| ![sol](figures/heatmap_sol.png) | SOL only (from Aug 2020) |
 
-Each figure is four heatmaps sharing the same layout — **rows = RSI window
+Each figure is one asset's study — assets are never averaged. Each figure is
+four heatmaps sharing the same layout — **rows = RSI window
 (2 at top → 30 at bottom), columns = timeframe (weekly, daily, 4h)**:
 
 - **Panel A** — average next-candle return after RSI in the *bottom* decile
@@ -233,8 +247,8 @@ Each figure is four heatmaps sharing the same layout — **rows = RSI window
 - **Panel B** — same for the *top* decile (the "overbought" notebook).
 - **Panels C/D** — the same two questions as t-statistics: *is the average in
   A/B distinguishable from luck?* (spell-clustered; see Part 3).
-- **Black borders** in A/B mark cells where |t| ≥ 2; anything approaching 3.5
-  (roughly ±3.5 in C/D) survives even the strict multiple-testing bar.
+- **Black borders** in A/B mark cells where |t| ≥ 2; anything approaching 3.7
+  (roughly ±3.7 in C/D) survives even the strict multiple-testing bar.
 
 Quick orientation: panel B being red almost everywhere while panel A is pale is
 the visual form of the headline result — continuation at highs, nothing at lows.
@@ -244,25 +258,27 @@ the visual form of the headline result — continuation at highs, nothing at low
 ## Technical abstract
 
 Using Binance spot candles for BTCUSDT and ETHUSDT (August 2017 – September 2026;
-475 weekly, 3,317 daily, 19,883 4-hour bars per asset), we sample every candle in
-which RSI falls in the bottom or top decile of its own distribution and measure
-the next candle's close-to-close return. RSI lookbacks of 2–30 are tested per
-timeframe, plus StochRSI (7/14/21, 14, 3, 3). t-statistics use standard errors
-clustered by decile spell; with ~200 cells tested, a multiple-testing-corrected
-5% threshold requires |t| ≥ 3.5.
+476 weekly, 3,323 daily, 19,919 4-hour bars per asset) and SOLUSDT (August 2020 –
+September 2026; 320 weekly, 2,233 daily, 13,395 4-hour bars), we sample every
+candle in which RSI falls in the bottom or top decile of its own distribution
+and measure the next candle's close-to-close return. Assets are studied
+individually — never averaged. RSI lookbacks of 2–30 are tested per timeframe,
+plus StochRSI (7/14/21, 14, 3, 3). t-statistics use standard errors clustered
+by decile spell; with 288 cells tested, a multiple-testing-corrected 5%
+threshold requires |t| ≥ 3.7.
 
 **Findings.**
 
-1. **Overbought is followed by continuation, not reversal, on every timeframe** —
-   the momentum result. Daily and 4h cells clear |t| = 2 and most clear the
-   |t| = 3.5 bar (clustered t up to ~4.6).
-2. **There is no reliable oversold bounce in crypto.** The only candidate is
-   daily RSI-2 (+0.59%/bar avg BTC+ETH, clustered t = 2.3): it survives
-   clustering but not the multiple-testing bar, and flips sign between sample
-   halves.
-3. **Weekly is momentum with thin evidence** — positive decile returns for
-   nearly all windows, but each weekly cell rests on ~46 events / ~13
-   independent spells.
+1. **Overbought is followed by continuation, not reversal — in every asset, on
+   its strongest timeframes.** BTC daily 16/16 windows at |t| ≥ 2 (max 4.6),
+   BTC 4h 15/16, ETH 4h 15/16 (4 cells ≥ 3.7), SOL daily 13/16 (max 3.5).
+2. **There is no reliable oversold bounce in any asset.** Scattered cells
+   clear |t| = 2 (BTC/ETH daily 1 of 16; SOL 4h 3 of 16 at ≈ +0.1%/bar — below
+   round-trip costs) but none survives the multiple-testing bar.
+3. **Weekly is thin — except SOL, where it is the strongest family in the
+   study:** top-decile RSI followed by +6.6–12.0% per week on windows 7–21,
+   clustered t up to 10.1, 11/16 windows past the strict bar (320 weekly
+   candles; spectacular but fragile).
 4. **StochRSI adds no incremental information over RSI** on 4h and daily
    (IC ≈ 0); the only signal appears on weekly with RSI length 21, pointing the
    same direction as plain RSI momentum.
@@ -270,10 +286,11 @@ clustered by decile spell; with ~200 cells tested, a multiple-testing-corrected
    per side; only slower windows (14) survive net of costs.
 
 Practical window picks (this sample, trend-following use): **1w: RSI 6–9 · 1d:
-RSI 14 (RSI 2–4 optional pullback-timing overlay) · 4h: RSI 14**. Evidence
-favours using RSI as a trend filter (long while RSI > 50) over classic 30/70
-reversal logic — consistent with Zatwarnicki et al. (2023), whose RSI>50 rule
-beat buy-and-hold while their oversold/overbought rule did not.
+RSI 14 (RSI 2–4 optional pullback-timing overlay) · 4h: RSI 14** — assessed per
+asset; SOL deviates (weekly spectacular, 4h inert). Evidence favours using RSI
+as a trend filter (long while RSI > 50) over classic 30/70 reversal logic —
+consistent with Zatwarnicki et al. (2023), whose RSI>50 rule beat buy-and-hold
+while their oversold/overbought rule did not.
 
 ---
 
@@ -286,10 +303,23 @@ followup.py         compounded momentum vs buy-and-hold, 4h cost sensitivity
 teaching_figures.py plain-language explainer figures (figures/explain_*.png)
 paper_heatmap.py    research-paper figures (results_ic*.csv -> figures/*.png)
 check_heatmap.py    figure layout verification (label fit, block collisions)
+adx_study/          companion ADX/DI study: same methodology, self-contained
+                    (own results/ and figures/; reuses data/ and hac_tstats.py)
 results/            all CSV outputs (committed)
 figures/            all figures (committed)
 data/               cached candles (NOT committed; fetched on first run)
 ```
+
+## Companion study — ADX & DI, same methodology
+
+The notebook test was repeated on Wilder's other 1978 oscillator, the DMI
+([adx_study/](adx_study/) — scripts, results and figures are self-contained
+there). Findings: strong trend is followed by **continuation**, not exhaustion;
+the simple **DI+ > DI−** rule beats both RSI>50 and buy-and-hold on daily and
+4h, net of costs; low ADX predicts nothing; and the classic fixed 20/40
+thresholds sit at asset-dependent percentiles of ADX's own distribution. Full
+write-up and the TradingView indicator it parameterizes:
+[adx_and_di.md](../pinescript/indicators/adx_and_di.md).
 
 ## Reproduce
 
@@ -311,8 +341,8 @@ python check_heatmap.py   # verifies figure layout
   t-statistics overstate significance. All reported t-statistics cluster
   standard errors by decile spell (the Newey–West / Hansen–Hodrick tradition for
   autocorrelated event returns).
-- **Multiple testing.** ~200 cells are tested; the Bonferroni 5% bar is
-  |t| ≥ 3.5. Pattern-level agreement across cells is weighted over any single
+- **Multiple testing.** 288 cells are tested; the Bonferroni 5% bar is
+  |t| ≥ 3.7. Pattern-level agreement across cells is weighted over any single
   cell.
 - **In-sample thresholds.** Decile cut-offs use the full sample; the event study
   is descriptive of this dataset, not a tradable rule. Momentum backtests are
@@ -331,12 +361,12 @@ python check_heatmap.py   # verifies figure layout
 | event | one candle where RSI was inside an extreme decile |
 | spell | one *visit* to the decile — a run of consecutive event candles (counted once) |
 | next-candle return | close-to-close % move of the candle right after the event |
-| t-statistic | "is the average real or luck?" — effect size ÷ noise; ±2 interesting, ±3.5 strict |
+| t-statistic | "is the average real or luck?" — effect size ÷ noise; ±2 interesting, ±3.7 strict |
 | clustered t | t-statistic adjusted so repeated spells can't inflate confidence |
 | IC / Spearman corr | rank correlation between indicator value and next return; 0 = no information |
 | net of cost | after paying 0.1% per side (fee + slippage) with next-open fills |
 | exposure | fraction of time the rule was actually in the market |
-| cell | one asset × timeframe × window × side combination in the scan (~200 total) |
+| cell | one asset × timeframe × window × side combination in the scan (288 total) |
 
 ## FAQ
 
@@ -350,14 +380,18 @@ use the full sample, so it describes this dataset rather than a rule you could
 have run live. The backtests (trend filter RSI > 50, next-open fills, 0.1% per
 side) are the tradable approximation, and they favour the trend-filter reading.
 
-**Why only BTC and ETH?** Nine years of clean, survivorship-free history on the
-two longest-lived assets. More assets would add sample breadth but also
-survivorship bias (picking today's winners) — see Limitations.
+**Why BTC, ETH and SOL?** BTC and ETH bring nine years of clean,
+survivorship-free history on the two longest-lived assets. SOL (from Aug 2020)
+adds a younger, higher-volatility asset — and its results (huge weekly
+momentum, inert 4h) are exactly why every asset is studied individually.
+Picking today's winners still biases toward assets that went up — see
+Limitations.
 
 ## Limitations
 
-Two survivor assets (BTC, ETH), one exchange, nine years of a single market
-regime mix. Weekly estimates are indicative only. The event study does not model
+Three survivor assets (BTC, ETH since 2017; SOL only since Aug 2020), one
+exchange, nine years of a single market regime mix. Weekly estimates are
+indicative only. The event study does not model
 costs or execution; the backtests model a flat 0.1% per side with next-open
 fills. Nothing here is investment advice.
 
